@@ -256,13 +256,20 @@ public final class NativeLibraryLoader {
                 // same as in this case it will not have any bad effect and we can just allow it.
                 URL url = urlsList.get(0);
                 byte[] digest = digest(url);
+                boolean allSame = true;
                 if (digest != null) {
                     for (int i = 1; i < size; i++) {
                         byte[] digest2 = digest(urlsList.get(i));
                         if (digest2 == null || !Arrays.equals(digest, digest2)) {
+                            allSame = false;
                             break;
                         }
                     }
+                } else {
+                    allSame = false;
+                }
+                if (allSame) {
+                    return url;
                 }
                 throw new IllegalStateException(
                         "Multiple resources found for '" + path + "' with different content: " + urlsList);
