@@ -30,6 +30,8 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.AccessController;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -250,7 +252,42 @@ public final class NativeLibraryLoader {
             case 1:
                 return urlsList.get(0);
             default:
-                throw new IllegalStateException("Multiple resources found for '" + path + "': " + urlsList);
+                // We found more then 1 resource with the same name. Let's check if the content of the file is the
+                // same as in this case it will not have any bad effect and we can just allow it.
+                URL url = urlsList.get(0);
+                byte[] digest = digest(url);
+                if (digest != null) {
+                    for (int i = 1; i < size; i++) {
+                        byte[] digest2 = digest(urlsList.get(i));
+                        if (digest2 == null || !Arrays.equals(digest, digest2)) {
+                            break;
+                        }
+                    }
+                }
+                throw new IllegalStateException(
+                        "Multiple resources found for '" + path + "' with different content: " + urlsList);
+        }
+    }
+
+    private static byte[] digest(URL url) {
+        InputStream in = null;
+        try {
+            in = url.openStream();
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            byte[] bytes = new byte[8192];
+            int i;
+            while ((i = in.read(bytes)) != -1) {
+                digest.update(bytes, 0, i);
+            }
+            return digest.digest();
+        } catch (NoSuchAlgorithmException e) {
+            logger.debug("Don't support MD5, can't check if resources have same content.", e);
+            return null;
+        } catch (IOException e) {
+            logger.debug("Can't read resource.", e);
+            return null;
+        } finally {
+            closeQuietly(in);
         }
     }
 
