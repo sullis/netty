@@ -15,11 +15,20 @@
  */
 package io.netty.handler.codec.compression;
 
+import com.aayushatharva.brotli4j.decoder.BrotliInputStream;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayInputStream;
+import java.util.Queue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BrotliEncoderTest extends AbstractEncoderTest {
 
@@ -79,5 +88,26 @@ public class BrotliEncoderTest extends AbstractEncoderTest {
             }
         }
         return decompressed;
+    }
+
+    @Test
+    public void brotliInputStreamCanReadCompressedData() throws Exception {
+        final String text = "Hello Hello Hello Hello Hello";
+        ByteBuf textBuf = ByteBufUtil.writeUtf8(ByteBufAllocator.DEFAULT, text);
+        final int textByteCount = textBuf.readableBytes();
+        System.out.println("text: " + text);
+        System.out.println("textByteCount: " + textByteCount);
+        ENCODER_CHANNEL.writeOutbound(textBuf);
+        ENCODER_CHANNEL.finish();
+        Queue<Object> queue = ENCODER_CHANNEL.outboundMessages();
+        System.out.println("queue.size: " + queue.size());
+        ByteBuf compressed = ENCODER_CHANNEL.readOutbound();
+        System.out.println("compressed readableBytes: " + compressed.readableBytes());
+        BrotliInputStream brotliInputStream = new BrotliInputStream(new ByteArrayInputStream(ByteBufUtil.getBytes(compressed)));
+        byte[] temp = new byte[textByteCount];
+        int n = brotliInputStream.read(temp);
+        assertEquals(textByteCount, n);
+        String result = new String(temp);
+        assertEquals(text, result);
     }
 }
