@@ -277,7 +277,11 @@ public final class BrotliEncoder extends MessageToByteEncoder<ByteBuf> {
                     return;
                 }
 
-                ctx.writeAndFlush(writableBuffer, promise);
+                ChannelFuture future = ctx.writeAndFlush(writableBuffer, promise);
+                Throwable cause = future.cause();
+                if (cause != null) {
+                    cause.printStackTrace();
+                }
             }
         }
     }
