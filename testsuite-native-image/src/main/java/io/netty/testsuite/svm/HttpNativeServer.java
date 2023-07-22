@@ -21,6 +21,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.compression.Brotli;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
@@ -36,13 +37,14 @@ public final class HttpNativeServer {
     private HttpNativeServer() {
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Throwable {
         // Configure the server.
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         // Control status.
         boolean serverStartSucess = false;
         try {
+            Brotli.ensureAvailability();
             ServerBootstrap b = new ServerBootstrap();
             b.option(ChannelOption.SO_BACKLOG, 1024);
             b.group(bossGroup, workerGroup)

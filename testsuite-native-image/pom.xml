@@ -63,6 +63,57 @@
       <version>${project.version}</version>
     </dependency>
 
+    <!-- brotli4j is needed for content compression -->
+    <dependency>
+      <groupId>com.aayushatharva.brotli4j</groupId>
+      <artifactId>brotli4j</artifactId>
+      <version>${brotli4j.version}</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.aayushatharva.brotli4j</groupId>
+      <artifactId>native-linux-x86_64</artifactId>
+      <version>${brotli4j.version}</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.aayushatharva.brotli4j</groupId>
+      <artifactId>native-linux-aarch64</artifactId>
+      <version>${brotli4j.version}</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.aayushatharva.brotli4j</groupId>
+      <artifactId>native-linux-armv7</artifactId>
+      <version>${brotli4j.version}</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.aayushatharva.brotli4j</groupId>
+      <artifactId>native-osx-x86_64</artifactId>
+      <version>${brotli4j.version}</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.aayushatharva.brotli4j</groupId>
+      <artifactId>native-osx-aarch64</artifactId>
+      <version>${brotli4j.version}</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.aayushatharva.brotli4j</groupId>
+      <artifactId>native-windows-x86_64</artifactId>
+      <version>${brotli4j.version}</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
+
   </dependencies>
 
   <profiles>
@@ -97,7 +148,10 @@
           <skip>${skipNativeImageTestsuite}</skip>
           <imageName>${project.artifactId}</imageName>
           <mainClass>io.netty.testsuite.svm.HttpNativeServer</mainClass>
-          <buildArgs>--report-unsupported-elements-at-runtime --allow-incomplete-classpath</buildArgs>
+          <buildArgs>--report-unsupported-elements-at-runtime --allow-incomplete-classpath --trace-class-initialization=com.aayushatharva.brotli4j.Brotli4jLoader</buildArgs>
+          <metadataRepository>
+            <enabled>true</enabled>
+          </metadataRepository>
         </configuration>
       </plugin>
       <plugin>
